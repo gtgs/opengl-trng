@@ -10,6 +10,7 @@ GLuint compileProgram(GLuint vertexShaderId, GLuint fragmentShaderId);
 GLuint loadShaderFromFile(const char* shader, GLuint type);
 
 GLint y = 0;
+GLint x = 0;
 int main() {
 	if(!glfwInit()) {
 		fprintf(stderr, "problem with starting glfw");
@@ -28,7 +29,6 @@ int main() {
 	}
 	glfwMakeContextCurrent(window);
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
-
 
 	glewInit();
 
@@ -162,13 +162,25 @@ int main() {
 	glDepthFunc(GL_LESS);
 
 	do{
+		if(glfwGetKey(window, GLFW_KEY_UP)) {
+			y++;
+		}
+		if(glfwGetKey(window, GLFW_KEY_DOWN)) {
+			y--;
+		}
+		if(glfwGetKey(window, GLFW_KEY_LEFT)) {
+			x--;
+		}
+		if(glfwGetKey(window, GLFW_KEY_RIGHT)) {
+			x++;
+		}
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glUseProgram(programId);
 	    glEnableVertexAttribArray(0);
 	    glEnableVertexAttribArray(1);
-	    //y++;
+
 	    glm::mat4 camera = glm::lookAt(
-			glm::vec3(y, y, 10),
+			glm::vec3(x, y, 10),
 			glm::vec3(0, 0, 0),
 			glm::vec3(0, 1, 0)
 		);
