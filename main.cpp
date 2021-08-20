@@ -112,7 +112,7 @@ int main() {
 //	glm::mat4 model = identity * translation;
 
 	glm::mat4 camera = glm::lookAt(
-		glm::vec3(0, 0, 20),
+		glm::vec3(0, 10, 10),
 		glm::vec3(0, 0, 0),
 		glm::vec3(0, 1, 0)
 	);
