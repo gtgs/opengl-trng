@@ -3,7 +3,9 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
-
+#include <glm/gtc/matrix_transform.hpp>
+#define WIDTH 800
+#define HEIGHT 600
 GLuint compileProgram(GLuint vertexShaderId, GLuint fragmentShaderId);
 GLuint loadShaderFromFile(const char* shader, GLuint type);
 
@@ -18,7 +20,7 @@ int main() {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	GLFWwindow* window;
-	window = glfwCreateWindow( 800, 600, "Render a triangle", NULL, NULL);
+	window = glfwCreateWindow( WIDTH, HEIGHT, "Render a triangle", NULL, NULL);
 	if( NULL == window){
 	    fprintf( stderr, "Failed to open a window\n" );
 	    glfwTerminate();
@@ -61,17 +63,38 @@ int main() {
 	}
 
 	GLuint programId = compileProgram(vertexShader, fragmentShader);
-	if(programId < 0) {
+	if(!programId) {
 		fprintf(stderr, "error in generating shaders");
 		return EXIT_FAILURE;
 
 	}
+
+	glm::mat4 identity = glm::mat4(1.0f);
+
+
+	glm::mat4 model = identity;
+//	glm::mat4 translation = glm::translate(glm::mat4(1.0f), glm::vec3(10.0f, 0.0f, 0.0f));
+//	glm::mat4 model = identity * translation;
+
+	glm::mat4 camera = glm::lookAt(
+		glm::vec3(0, 0, 20),
+		glm::vec3(0, 0, 0),
+		glm::vec3(0, 1, 0)
+	);
+
+	glm::mat4 projection = glm::perspective(glm::radians(60.0f), WIDTH * 1.0f/HEIGHT, 0.1f, 1000.0f);
+
+	glm::mat4 mvp = projection * camera * model;
 
 	do{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glUseProgram(programId);
 	    glEnableVertexAttribArray(0);
 	    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+
+	    GLuint vs_mvp = glGetUniformLocation(programId, "mvp");
+	    glUniformMatrix4fv(vs_mvp, 1, GL_FALSE, &mvp[0][0]);
+
 
 	    /** set the attrib pointer inside the data **/
 	    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
@@ -134,6 +157,7 @@ GLuint compileProgram(GLuint vertexShaderId, GLuint fragmentShaderId) {
 			char * msg = ((char*) malloc(sizeof(char) * (infoLogLength + 1)));
 			glGetProgramInfoLog(programId, infoLogLength, 0, msg);
 			fprintf(stderr, "there was an error linking the shader - %s", msg);
+			return 0;
 		}
 	}
 	return programId;
