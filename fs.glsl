@@ -1,5 +1,6 @@
 #version 330 core
 out vec3 color;
+in vec3 pixelColor;
 void main() {
-	color = vec3(1, 0, 0);
+	color = pixelColor;
 }
