@@ -38,9 +38,44 @@ int main() {
 	glBindVertexArray(va);
 
 	GLfloat vertices[] = {
-		-1.0f, -1.0f, 0.0f,
-		1.0f, -1.0f,0.0f,
-		0.0f, 1.0f, 0.0f
+	    -1.0f,-1.0f,-1.0f,
+	    -1.0f,-1.0f, 1.0f,
+	    -1.0f, 1.0f, 1.0f,
+
+	    1.0f, 1.0f,-1.0f,
+	    -1.0f,-1.0f,-1.0f,
+	    -1.0f, 1.0f,-1.0f,
+
+	    1.0f,-1.0f, 1.0f,
+	    -1.0f,-1.0f,-1.0f,
+	    1.0f,-1.0f,-1.0f,
+	    1.0f, 1.0f,-1.0f,
+	    1.0f,-1.0f,-1.0f,
+	    -1.0f,-1.0f,-1.0f,
+	    -1.0f,-1.0f,-1.0f,
+	    -1.0f, 1.0f, 1.0f,
+	    -1.0f, 1.0f,-1.0f,
+	    1.0f,-1.0f, 1.0f,
+	    -1.0f,-1.0f, 1.0f,
+	    -1.0f,-1.0f,-1.0f,
+	    -1.0f, 1.0f, 1.0f,
+	    -1.0f,-1.0f, 1.0f,
+	    1.0f,-1.0f, 1.0f,
+	    1.0f, 1.0f, 1.0f,
+	    1.0f,-1.0f,-1.0f,
+	    1.0f, 1.0f,-1.0f,
+	    1.0f,-1.0f,-1.0f,
+	    1.0f, 1.0f, 1.0f,
+	    1.0f,-1.0f, 1.0f,
+	    1.0f, 1.0f, 1.0f,
+	    1.0f, 1.0f,-1.0f,
+	    -1.0f, 1.0f,-1.0f,
+	    1.0f, 1.0f, 1.0f,
+	    -1.0f, 1.0f,-1.0f,
+	    -1.0f, 1.0f, 1.0f,
+	    1.0f, 1.0f, 1.0f,
+	    -1.0f, 1.0f, 1.0f,
+	    1.0f,-1.0f, 1.0f
 	};
 
 	GLuint vertexBuffer;
@@ -98,7 +133,7 @@ int main() {
 
 	    /** set the attrib pointer inside the data **/
 	    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
 	    glDisableVertexAttribArray(0);
 	    glfwSwapBuffers(window);
 	    glfwPollEvents();
