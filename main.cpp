@@ -9,7 +9,7 @@
 GLuint compileProgram(GLuint vertexShaderId, GLuint fragmentShaderId);
 GLuint loadShaderFromFile(const char* shader, GLuint type);
 
-
+GLint y = 0;
 int main() {
 	if(!glfwInit()) {
 		fprintf(stderr, "problem with starting glfw");
@@ -111,21 +111,23 @@ int main() {
 //	glm::mat4 translation = glm::translate(glm::mat4(1.0f), glm::vec3(10.0f, 0.0f, 0.0f));
 //	glm::mat4 model = identity * translation;
 
-	glm::mat4 camera = glm::lookAt(
-		glm::vec3(0, 10, 10),
-		glm::vec3(0, 0, 0),
-		glm::vec3(0, 1, 0)
-	);
-
-	glm::mat4 projection = glm::perspective(glm::radians(60.0f), WIDTH * 1.0f/HEIGHT, 0.1f, 1000.0f);
-
-	glm::mat4 mvp = projection * camera * model;
 
 	do{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glUseProgram(programId);
 	    glEnableVertexAttribArray(0);
 	    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+	    y++;
+	    glm::mat4 camera = glm::lookAt(
+			glm::vec3(y, y, 10),
+			glm::vec3(0, 0, 0),
+			glm::vec3(0, 1, 0)
+		);
+
+		glm::mat4 projection = glm::perspective(glm::radians(60.0f), WIDTH * 1.0f/HEIGHT, 0.1f, 1000.0f);
+
+		glm::mat4 mvp = projection * camera * model;
+
 
 	    GLuint vs_mvp = glGetUniformLocation(programId, "mvp");
 	    glUniformMatrix4fv(vs_mvp, 1, GL_FALSE, &mvp[0][0]);
