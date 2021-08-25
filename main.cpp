@@ -11,6 +11,7 @@ GLuint loadShaderFromFile(const char* shader, GLuint type);
 
 GLint y = 0;
 GLint x = 0;
+GLuint polygonMode = GL_FILL;
 int main() {
 	if(!glfwInit()) {
 		fprintf(stderr, "problem with starting glfw");
@@ -174,7 +175,17 @@ int main() {
 		if(glfwGetKey(window, GLFW_KEY_RIGHT)) {
 			x++;
 		}
+		if(glfwGetKey(window, GLFW_KEY_SPACE)){
+			if(GL_FILL == polygonMode){
+				polygonMode = GL_LINE;
+			} else if(GL_LINE == polygonMode) {
+				polygonMode = GL_POINT;
+			} else {
+				polygonMode = GL_FILL;
+			}
+		}
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glPolygonMode(GL_FRONT_AND_BACK, polygonMode);
 		glUseProgram(programId);
 	    glEnableVertexAttribArray(0);
 	    glEnableVertexAttribArray(1);
