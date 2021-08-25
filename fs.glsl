@@ -8,5 +8,5 @@ in vec2 _uv;
 
 void main() {
 
-	diffuse = texture(map, _uv);
+	diffuse = texture(map, _uv) * vec4(_color, 1);
 }
