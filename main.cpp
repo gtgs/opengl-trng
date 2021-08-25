@@ -4,11 +4,14 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+//#include <SOIL/SOIL.h>
+#include "stb_image.h"
+#include <memory.h>
 #define WIDTH 800
 #define HEIGHT 600
 GLuint compileProgram(GLuint vertexShaderId, GLuint fragmentShaderId);
 GLuint loadShaderFromFile(const char* shader, GLuint type);
-
+GLuint loadTexture(const char* filename, int width, int height, GLint bitsPerPixel);
 GLint y = 0;
 GLint x = 0;
 GLuint polygonMode = GL_FILL;
@@ -39,7 +42,7 @@ int main() {
 	glBindVertexArray(va);
 
 	GLfloat vertices[] = {
-	    -1.0f,-1.0f,-1.0f,
+	    -1.0f,-1.0f,-1.0f,		/** left upper**/
 	    -1.0f,-1.0f, 1.0f,
 	    -1.0f, 1.0f, 1.0f,
 
@@ -50,31 +53,40 @@ int main() {
 	    1.0f,-1.0f, 1.0f,
 	    -1.0f,-1.0f,-1.0f,
 	    1.0f,-1.0f,-1.0f,
-	    1.0f, 1.0f,-1.0f,
+
+		1.0f, 1.0f,-1.0f,
 	    1.0f,-1.0f,-1.0f,
 	    -1.0f,-1.0f,-1.0f,
-	    -1.0f,-1.0f,-1.0f,
+
+		-1.0f,-1.0f,-1.0f,
 	    -1.0f, 1.0f, 1.0f,
 	    -1.0f, 1.0f,-1.0f,
-	    1.0f,-1.0f, 1.0f,
+
+		1.0f,-1.0f, 1.0f,
 	    -1.0f,-1.0f, 1.0f,
 	    -1.0f,-1.0f,-1.0f,
-	    -1.0f, 1.0f, 1.0f,
+
+		-1.0f, 1.0f, 1.0f,
 	    -1.0f,-1.0f, 1.0f,
 	    1.0f,-1.0f, 1.0f,
-	    1.0f, 1.0f, 1.0f,
+
+		1.0f, 1.0f, 1.0f,
 	    1.0f,-1.0f,-1.0f,
 	    1.0f, 1.0f,-1.0f,
-	    1.0f,-1.0f,-1.0f,
+
+		1.0f,-1.0f,-1.0f,
 	    1.0f, 1.0f, 1.0f,
 	    1.0f,-1.0f, 1.0f,
-	    1.0f, 1.0f, 1.0f,
+
+		1.0f, 1.0f, 1.0f,
 	    1.0f, 1.0f,-1.0f,
 	    -1.0f, 1.0f,-1.0f,
-	    1.0f, 1.0f, 1.0f,
+
+		1.0f, 1.0f, 1.0f,
 	    -1.0f, 1.0f,-1.0f,
 	    -1.0f, 1.0f, 1.0f,
-	    1.0f, 1.0f, 1.0f,
+
+		1.0f, 1.0f, 1.0f,
 	    -1.0f, 1.0f, 1.0f,
 	    1.0f,-1.0f, 1.0f
 	};
@@ -120,6 +132,45 @@ int main() {
 	    0.982f,  0.099f,  0.879f
 	};
 
+	GLfloat uv[] = {
+			0.000059f, 1.0f-0.000004f,
+			0.000103f, 1.0f-0.336048f,
+			0.335973f, 1.0f-0.335903f,
+			1.000023f, 1.0f-0.000013f,
+			0.667979f, 1.0f-0.335851f,
+			0.999958f, 1.0f-0.336064f,
+			0.667979f, 1.0f-0.335851f,
+			0.336024f, 1.0f-0.671877f,
+			0.667969f, 1.0f-0.671889f,
+			1.000023f, 1.0f-0.000013f,
+			0.668104f, 1.0f-0.000013f,
+			0.667979f, 1.0f-0.335851f,
+			0.000059f, 1.0f-0.000004f,
+			0.335973f, 1.0f-0.335903f,
+			0.336098f, 1.0f-0.000071f,
+			0.667979f, 1.0f-0.335851f,
+			0.335973f, 1.0f-0.335903f,
+			0.336024f, 1.0f-0.671877f,
+			1.000004f, 1.0f-0.671847f,
+			0.999958f, 1.0f-0.336064f,
+			0.667979f, 1.0f-0.335851f,
+			0.668104f, 1.0f-0.000013f,
+			0.335973f, 1.0f-0.335903f,
+			0.667979f, 1.0f-0.335851f,
+			0.335973f, 1.0f-0.335903f,
+			0.668104f, 1.0f-0.000013f,
+			0.336098f, 1.0f-0.000071f,
+			0.000103f, 1.0f-0.336048f,
+			0.000004f, 1.0f-0.671870f,
+			0.336024f, 1.0f-0.671877f,
+			0.000103f, 1.0f-0.336048f,
+			0.336024f, 1.0f-0.671877f,
+			0.335973f, 1.0f-0.335903f,
+			0.667969f, 1.0f-0.671889f,
+			1.000004f, 1.0f-0.671847f,
+			0.667979f, 1.0f-0.335851f
+	};
+
 	GLuint vertexBuffer;
 	glGenBuffers(1, &vertexBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
@@ -131,6 +182,13 @@ int main() {
 	glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
 	/** set the data pointer for color **/
 	glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
+
+
+	GLuint uvBuffer;
+	glGenBuffers(1, &uvBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(uv), uv, GL_STATIC_DRAW);
+
 
 	GLuint vertexShader = loadShaderFromFile("./vs.glsl",GL_VERTEX_SHADER);
 	if(!vertexShader){
@@ -150,6 +208,15 @@ int main() {
 		return EXIT_FAILURE;
 
 	}
+	int width = 0;
+	int height = 0;
+	int bpp = 0;
+	GLuint textureBrick = loadTexture("/home/girishsarwal/eclipse-workspace/OpenGL/Debug/assets/brick.png", width, height, bpp);
+	if(textureBrick == 0){
+		fprintf(stderr, "could not load texture");
+		return EXIT_FAILURE;
+	}
+
 
 	glm::mat4 identity = glm::mat4(1.0f);
 
@@ -158,9 +225,11 @@ int main() {
 //	glm::mat4 translation = glm::translate(glm::mat4(1.0f), glm::vec3(10.0f, 0.0f, 0.0f));
 //	glm::mat4 model = identity * translation;
 
+
 	glEnable(GL_DEPTH_TEST);
 	// Accept fragment if it closer to the camera than the former one
 	glDepthFunc(GL_LESS);
+
 
 	do{
 		if(glfwGetKey(window, GLFW_KEY_UP)) {
@@ -189,6 +258,7 @@ int main() {
 		glUseProgram(programId);
 	    glEnableVertexAttribArray(0);
 	    glEnableVertexAttribArray(1);
+	    glEnableVertexAttribArray(2);
 
 	    glm::mat4 camera = glm::lookAt(
 			glm::vec3(x, y, 10),
@@ -212,9 +282,17 @@ int main() {
 	    glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
 	    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
+	    glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
+	    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+	    glBindTexture(GL_TEXTURE_2D, textureBrick);
+
 		glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
+
 	    glDisableVertexAttribArray(0);
 	    glDisableVertexAttribArray(1);
+	    glDisableVertexAttribArray(2);
+
 	    glfwSwapBuffers(window);
 	    glfwPollEvents();
 	}
@@ -222,6 +300,27 @@ int main() {
 
 }
 
+
+GLuint loadTexture(const char* filename, int width, int height, GLint bitsPerPixel) {
+	fprintf(stderr, "Loading texture from %s\n", filename);
+	GLuint textureId;
+	glGenTextures(1, &textureId);
+	if(textureId == 0) {
+			fprintf(stderr, "cannot generate texture");
+			return EXIT_FAILURE;
+	}
+	glBindTexture(GL_TEXTURE_2D, textureId);
+	unsigned char* imageData = stbi_load(filename, &width, &height, &bitsPerPixel, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, imageData);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	stbi_image_free(imageData);
+	//textureId = SOIL_load_OGL_texture(filename, SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS);
+	//unsigned char* pImageData = SOIL_load_image(filename, &width, &height, &bitsPerPixel, SOIL_LOAD_AUTO);
+	//textureId = SOIL_create_OGL_texture(pImageData, width, height, bitsPerPixel, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB);
+
+	//SOIL_free_image_data(pImageData);
+	return textureId;
+}
 
 GLuint loadShaderFromFile(const char* shader, GLuint type) {
 	GLuint shaderId = glCreateShader(type);
@@ -234,7 +333,7 @@ GLuint loadShaderFromFile(const char* shader, GLuint type) {
 	unsigned long length = ftell(fp);
 	rewind(fp);
 	char* shaderSource = (char*) malloc (sizeof(char) * (length + 1));
-
+	memset(shaderSource, 0, sizeof(char) * (length + 1));
 	fread(shaderSource, length, 1, fp);
 
 	fprintf(stderr, "\n shader source is \n--%s (%lu bytes)--\n%s\n--END-- ", shader, length, shaderSource);

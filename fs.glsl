@@ -1,6 +1,12 @@
 #version 330 core
-out vec3 color;
-in vec3 pixelColor;
+out vec4 diffuse;
+
+uniform sampler2D map;
+
+in vec3 _color;
+in vec2 _uv;
+
 void main() {
-	color = pixelColor;
+
+	diffuse = texture(map, _uv);
 }
