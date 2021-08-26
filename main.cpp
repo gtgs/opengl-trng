@@ -290,7 +290,7 @@ GLuint loadVertexDataFromFile(const char* filename, std::vector<glm::vec2> &data
 		return EXIT_FAILURE;
 	}
 	GLuint index = 0;
-	glm::vec3 entry;
+	glm::vec2 entry;
 	fprintf(stderr, "reading file - %s\n", filename);
 	while(index++ < (numberOfVertices)){
 		fscanf(fp, "%f,%f", &entry.x, &entry.y);
