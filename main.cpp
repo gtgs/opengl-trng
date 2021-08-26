@@ -7,13 +7,15 @@
 #include "stb_image.h"
 #include <memory.h>
 #include <vector>
+#include "vertex.h"
 #define WIDTH 800
 #define HEIGHT 600
 GLuint compileProgram(GLuint vertexShaderId, GLuint fragmentShaderId);
 GLuint loadShaderFromFile(const char* shader, GLuint type);
 GLuint loadTexture(const char* filename, int width, int height, GLint bitsPerPixel);
-GLuint loadVertexDataFromFile(const char* filename, std::vector<glm::vec3> &data, GLuint numberOfVertices);
-GLuint loadVertexDataFromFile(const char* filename, std::vector<glm::vec2> &data, GLuint numberOfVertices);
+GLuint loadVertexDataFromFile(const char* filename, std::vector<vertex> &data, GLuint numberOfVertices);
+GLuint loadIndexDataFromFile(const char* filename, std::vector<GLuint> &data, GLuint numberOfIndices);
+
 
 GLint y = 0;
 GLint x = 0;
@@ -43,23 +45,18 @@ int main() {
 	glGenVertexArrays(1, &va);
 	glBindVertexArray(va);
 
-	std::vector<glm::vec3> vertices;
-	std::vector<glm::vec3> colors;
-	std::vector<glm::vec2> uvs;
+	std::vector<vertex> vertices;
+	std::vector<GLuint> indices;
 
 
-	if(EXIT_FAILURE == loadVertexDataFromFile("./assets/cube.vertices", vertices, 36)){
+
+	if(EXIT_FAILURE == loadVertexDataFromFile("./assets/cube.vertices", vertices, 8)){
 		fprintf( stderr, "Failed to load position information\n" );
 		glfwTerminate();
 		return EXIT_FAILURE;
 	}
-	if(EXIT_FAILURE == loadVertexDataFromFile("./assets/cube.colors", colors, 36)){
-		fprintf( stderr, "Failed to load color information\n" );
-		glfwTerminate();
-		return EXIT_FAILURE;
-	}
-	if(EXIT_FAILURE == loadVertexDataFromFile("./assets/cube.uvs", uvs, 36)){
-		fprintf( stderr, "Failed to load uv information\n" );
+	if(EXIT_FAILURE == loadIndexDataFromFile("./assets/cube.indices", indices, 36)){
+		fprintf( stderr, "Failed to load position information\n" );
 		glfwTerminate();
 		return EXIT_FAILURE;
 	}
@@ -69,20 +66,12 @@ int main() {
 	glGenBuffers(1, &vertexBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
 	/** set the data pointer **/
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertex), &vertices[0], GL_STATIC_DRAW);
 
-	GLuint colorBuffer;
-	glGenBuffers(1, &colorBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
-	/** set the data pointer for color **/
-	glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(glm::vec3), &colors[0], GL_STATIC_DRAW);
-
-
-	GLuint uvBuffer;
-	glGenBuffers(1, &uvBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
-	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
-
+	GLuint indexBuffer;
+	glGenBuffers(1, &indexBuffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), &indices[0], GL_STATIC_DRAW);
 
 	GLuint vertexShader = loadShaderFromFile("./vs.glsl",GL_VERTEX_SHADER);
 	if(!vertexShader){
@@ -105,8 +94,8 @@ int main() {
 	int width = 0;
 	int height = 0;
 	int bpp = 0;
-	GLuint textureBrick = loadTexture("./assets/brick.png", width, height, bpp);
-	if(textureBrick == 0){
+	GLuint map = loadTexture("./assets/brick.png", width, height, bpp);
+	if(map== 0){
 		fprintf(stderr, "could not load texture");
 		return EXIT_FAILURE;
 	}
@@ -171,17 +160,14 @@ int main() {
 
 	    /** set the attrib pointer inside the data **/
 	    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-	    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)0);
+	    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)(sizeof(glm::vec3)));
+	    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)(sizeof(glm::vec3) + sizeof(glm::vec3)));
 
-	    glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
-	    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	    glBindTexture(GL_TEXTURE_2D, map);
 
-	    glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
-	    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
-
-	    glBindTexture(GL_TEXTURE_2D, textureBrick);
-
-		glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
+	    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+	    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, (void*)0);
 
 	    glDisableVertexAttribArray(0);
 	    glDisableVertexAttribArray(1);
@@ -267,35 +253,39 @@ GLuint compileProgram(GLuint vertexShaderId, GLuint fragmentShaderId) {
 	}
 	return programId;
 }
-GLuint loadVertexDataFromFile(const char* filename, std::vector<glm::vec3> &data, GLuint numberOfVertices){
+GLuint loadVertexDataFromFile(const char* filename, std::vector<vertex> &data, GLuint numberOfVertices){
 	FILE * fp = fopen(filename, "r");
 	if(NULL == fp){
 		fprintf(stderr, "cannot read file - %s\n", filename);
 		return EXIT_FAILURE;
 	}
 	GLuint index = 0;
-	glm::vec3 entry;
+	vertex entry;
 	fprintf(stderr, "reading file - %s\n", filename);
 	while(index++ < (numberOfVertices)){
-		fscanf(fp, "%f,%f,%f", &entry.x, &entry.y, &entry.z);
+		fscanf(fp, "%f,%f,%f,%f,%f,%f,%f,%f", &entry.position.x, &entry.position.y, &entry.position.z, &entry.color.r, &entry.color.g, &entry.color.b, &entry.uv.s, &entry.uv.t);
+		fprintf(stderr, "%f,%f,%f,%f,%f,%f,%f,%f\n", entry.position.x, entry.position.y, entry.position.z, entry.color.r, entry.color.g, entry.color.b, entry.uv.s, entry.uv.t);
 		data.push_back(entry);
 	}
 	fclose(fp);
 	return EXIT_SUCCESS;
 }
-GLuint loadVertexDataFromFile(const char* filename, std::vector<glm::vec2> &data, GLuint numberOfVertices){
+
+GLuint loadIndexDataFromFile(const char* filename, std::vector<GLuint> &data, GLuint numberOfIndices){
 	FILE * fp = fopen(filename, "r");
 	if(NULL == fp){
 		fprintf(stderr, "cannot read file - %s\n", filename);
 		return EXIT_FAILURE;
 	}
 	GLuint index = 0;
-	glm::vec2 entry;
+	GLuint entry;
 	fprintf(stderr, "reading file - %s\n", filename);
-	while(index++ < (numberOfVertices)){
-		fscanf(fp, "%f,%f", &entry.x, &entry.y);
+	while(index++ < (numberOfIndices)){
+		fscanf(fp, "%d", &entry);
+		fprintf(stderr, "%d\n", entry);
 		data.push_back(entry);
 	}
 	fclose(fp);
 	return EXIT_SUCCESS;
 }
+
