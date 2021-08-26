@@ -6,12 +6,14 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "stb_image.h"
 #include <memory.h>
+#include <vector>
 #define WIDTH 800
 #define HEIGHT 600
 GLuint compileProgram(GLuint vertexShaderId, GLuint fragmentShaderId);
 GLuint loadShaderFromFile(const char* shader, GLuint type);
 GLuint loadTexture(const char* filename, int width, int height, GLint bitsPerPixel);
-GLuint loadVertexDataFromFile(const char* filename, GLfloat** outData, GLuint numberOfVertices, GLuint stride);
+GLuint loadVertexDataFromFile(const char* filename, std::vector<glm::vec3> &data, GLuint numberOfVertices);
+GLuint loadVertexDataFromFile(const char* filename, std::vector<glm::vec2> &data, GLuint numberOfVertices);
 
 GLint y = 0;
 GLint x = 0;
@@ -37,36 +39,49 @@ int main() {
 
 	glewInit();
 
-	/** create a VAO **/
 	GLuint va;
 	glGenVertexArrays(1, &va);
 	glBindVertexArray(va);
 
-	GLfloat* vertices = NULL;
-	GLfloat* colors = NULL;
-	GLfloat* uvs = NULL;
+	std::vector<glm::vec3> vertices;
+	std::vector<glm::vec3> colors;
+	std::vector<glm::vec2> uvs;
 
-	loadVertexDataFromFile("./assets/cube.vertices", &vertices, 36, 3);
 
-	return EXIT_SUCCESS;
+	if(EXIT_FAILURE == loadVertexDataFromFile("./assets/cube.vertices", vertices, 36)){
+		fprintf( stderr, "Failed to load position information\n" );
+		glfwTerminate();
+		return EXIT_FAILURE;
+	}
+	if(EXIT_FAILURE == loadVertexDataFromFile("./assets/cube.colors", colors, 36)){
+		fprintf( stderr, "Failed to load color information\n" );
+		glfwTerminate();
+		return EXIT_FAILURE;
+	}
+	if(EXIT_FAILURE == loadVertexDataFromFile("./assets/cube.uvs", uvs, 36)){
+		fprintf( stderr, "Failed to load uv information\n" );
+		glfwTerminate();
+		return EXIT_FAILURE;
+	}
+
 
 	GLuint vertexBuffer;
 	glGenBuffers(1, &vertexBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
 	/** set the data pointer **/
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
 
 	GLuint colorBuffer;
 	glGenBuffers(1, &colorBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
 	/** set the data pointer for color **/
-	glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(glm::vec3), &colors[0], GL_STATIC_DRAW);
 
 
 	GLuint uvBuffer;
 	glGenBuffers(1, &uvBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(uvs), uvs, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
 
 
 	GLuint vertexShader = loadShaderFromFile("./vs.glsl",GL_VERTEX_SHADER);
@@ -252,26 +267,35 @@ GLuint compileProgram(GLuint vertexShaderId, GLuint fragmentShaderId) {
 	}
 	return programId;
 }
-
-GLuint loadVertexDataFromFile(const char* filename, GLfloat** outData, GLuint numberOfVertices, GLuint stride) {
+GLuint loadVertexDataFromFile(const char* filename, std::vector<glm::vec3> &data, GLuint numberOfVertices){
 	FILE * fp = fopen(filename, "r");
 	if(NULL == fp){
 		fprintf(stderr, "cannot read file - %s\n", filename);
-		return 0;
-	}
-	fprintf(stderr, "reading file - %s\n", filename);
-	if(NULL == *outData) {
-		fprintf(stderr, "allocating memory for %d bytes \n", sizeof(GLfloat) * numberOfVertices * stride);
-		*outData = (GLfloat*) malloc(sizeof(GLfloat) * numberOfVertices * stride);
+		return EXIT_FAILURE;
 	}
 	GLuint index = 0;
-	while(index < (numberOfVertices * stride)){
-		fprintf(stderr, "%d", index);
-		//fscanf(fp, "%f,%f,%f", *outData[index++], *outData[index++], *outData[index++]);
-
-		fprintf(stderr, "read %f, %f, %f\n", *outData[index], *outData[index + 1], *outData[index + 2]);
+	glm::vec3 entry;
+	fprintf(stderr, "reading file - %s\n", filename);
+	while(index++ < (numberOfVertices)){
+		fscanf(fp, "%f,%f,%f", &entry.x, &entry.y, &entry.z);
+		data.push_back(entry);
 	}
-
 	fclose(fp);
-	return 0;
+	return EXIT_SUCCESS;
+}
+GLuint loadVertexDataFromFile(const char* filename, std::vector<glm::vec2> &data, GLuint numberOfVertices){
+	FILE * fp = fopen(filename, "r");
+	if(NULL == fp){
+		fprintf(stderr, "cannot read file - %s\n", filename);
+		return EXIT_FAILURE;
+	}
+	GLuint index = 0;
+	glm::vec3 entry;
+	fprintf(stderr, "reading file - %s\n", filename);
+	while(index++ < (numberOfVertices)){
+		fscanf(fp, "%f,%f", &entry.x, &entry.y);
+		data.push_back(entry);
+	}
+	fclose(fp);
+	return EXIT_SUCCESS;
 }
