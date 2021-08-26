@@ -301,6 +301,7 @@ int main() {
 }
 
 
+
 GLuint loadTexture(const char* filename, int width, int height, GLint bitsPerPixel) {
 	fprintf(stderr, "Loading texture from %s\n", filename);
 	GLuint textureId;
@@ -314,11 +315,6 @@ GLuint loadTexture(const char* filename, int width, int height, GLint bitsPerPix
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, imageData);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	stbi_image_free(imageData);
-	//textureId = SOIL_load_OGL_texture(filename, SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS);
-	//unsigned char* pImageData = SOIL_load_image(filename, &width, &height, &bitsPerPixel, SOIL_LOAD_AUTO);
-	//textureId = SOIL_create_OGL_texture(pImageData, width, height, bitsPerPixel, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB);
-
-	//SOIL_free_image_data(pImageData);
 	return textureId;
 }
 
