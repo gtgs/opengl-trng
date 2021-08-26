@@ -50,12 +50,12 @@ int main() {
 
 
 
-	if(EXIT_FAILURE == loadVertexDataFromFile("./assets/cube.vertices", vertices, 8)){
+	if(EXIT_FAILURE == loadVertexDataFromFile("./assets/models/cube.vertices", vertices, 8)){
 		fprintf( stderr, "Failed to load position information\n" );
 		glfwTerminate();
 		return EXIT_FAILURE;
 	}
-	if(EXIT_FAILURE == loadIndexDataFromFile("./assets/cube.indices", indices, 36)){
+	if(EXIT_FAILURE == loadIndexDataFromFile("./assets/models/cube.indices", indices, 36)){
 		fprintf( stderr, "Failed to load position information\n" );
 		glfwTerminate();
 		return EXIT_FAILURE;
@@ -73,13 +73,13 @@ int main() {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), &indices[0], GL_STATIC_DRAW);
 
-	GLuint vertexShader = loadShaderFromFile("./vs.glsl",GL_VERTEX_SHADER);
+	GLuint vertexShader = loadShaderFromFile("./assets/shaders/mvpvs.glsl",GL_VERTEX_SHADER);
 	if(!vertexShader){
 		fprintf(stderr, "cannot load vertex shader");
 		return EXIT_FAILURE;
 	}
 
-	GLuint fragmentShader = loadShaderFromFile("./fs.glsl",GL_FRAGMENT_SHADER);
+	GLuint fragmentShader = loadShaderFromFile("./assets/shaders/mvpfs.glsl",GL_FRAGMENT_SHADER);
 	if(!vertexShader){
 		fprintf(stderr, "cannot load fragment shader");
 		return EXIT_FAILURE;
@@ -94,7 +94,7 @@ int main() {
 	int width = 0;
 	int height = 0;
 	int bpp = 0;
-	GLuint map = loadTexture("./assets/brick.png", width, height, bpp);
+	GLuint map = loadTexture("./assets/textures/brick.png", width, height, bpp);
 	if(map== 0){
 		fprintf(stderr, "could not load texture");
 		return EXIT_FAILURE;
@@ -143,7 +143,7 @@ int main() {
 	    glEnableVertexAttribArray(1);
 	    glEnableVertexAttribArray(2);
 
-	    glm::mat4 camera = glm::lookAt(
+	    glm::mat4 view = glm::lookAt(
 			glm::vec3(x, y, 10),
 			glm::vec3(0, 0, 0),
 			glm::vec3(0, 1, 0)
@@ -151,11 +151,15 @@ int main() {
 
 		glm::mat4 projection = glm::perspective(glm::radians(60.0f), WIDTH * 1.0f/HEIGHT, 0.1f, 1000.0f);
 
-		glm::mat4 mvp = projection * camera * model;
 
 
-	    GLuint vs_mvp = glGetUniformLocation(programId, "mvp");
-	    glUniformMatrix4fv(vs_mvp, 1, GL_FALSE, &mvp[0][0]);
+	    GLuint vs_m = glGetUniformLocation(programId, "m");
+	    GLuint vs_v = glGetUniformLocation(programId, "v");
+	    GLuint vs_p = glGetUniformLocation(programId, "p");
+
+	    glUniformMatrix4fv(vs_m, 1, GL_FALSE, &model[0][0]);
+	    glUniformMatrix4fv(vs_v, 1, GL_FALSE, &view[0][0]);
+	    glUniformMatrix4fv(vs_p, 1, GL_FALSE, &projection[0][0]);
 
 
 	    /** set the attrib pointer inside the data **/
@@ -194,6 +198,9 @@ GLuint loadTexture(const char* filename, int width, int height, GLint bitsPerPix
 	glBindTexture(GL_TEXTURE_2D, textureId);
 	unsigned char* imageData = stbi_load(filename, &width, &height, &bitsPerPixel, 0);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, imageData);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
 	glGenerateMipmap(GL_TEXTURE_2D);
 	stbi_image_free(imageData);
 	return textureId;
