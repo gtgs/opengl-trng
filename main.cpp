@@ -128,6 +128,7 @@ int main() {
 	    glEnableVertexAttribArray(0);
 	    glEnableVertexAttribArray(1);
 	    glEnableVertexAttribArray(2);
+	    glEnableVertexAttribArray(3);
 
 	    glm::mat4 view = glm::lookAt(
 			glm::vec3(x, y, 10),
@@ -155,11 +156,27 @@ int main() {
 	    glUniform3f(fs_ambientColor, ambientColor.r, ambientColor.g, ambientColor.b);
 	    glUniform1f(fs_ambientStrength, ambientStrength);
 
+
+
+	    glm::vec3 directionalLightPosition(10, 20, 5);
+		glm::vec3 directionalLightColor(0.5f, 0.0f, 0.0f);
+		GLfloat directionalLightStrength = 2.0f;
+
+	    GLuint fs_directionalLightPosition = glGetUniformLocation(programId, "directionalLightPosition");
+	    GLuint fs_directionalLightColor= glGetUniformLocation(programId, "directionalLightColor");
+	    GLuint fs_directionalLightStrength = glGetUniformLocation(programId, "directionalLightStrength");
+
+	    glUniform3f(fs_directionalLightPosition, directionalLightPosition.x, directionalLightPosition.y, directionalLightPosition.z);
+	    glUniform3f(fs_directionalLightColor, directionalLightColor.x, directionalLightColor.y, directionalLightColor.z);
+	    glUniform1f(fs_directionalLightStrength, directionalLightStrength);
+
+
 	    /** set the attrib pointer inside the data **/
 	    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
 	    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)0);
 	    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)(sizeof(glm::vec3)));
 	    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)(sizeof(glm::vec3) + sizeof(glm::vec3)));
+	    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)(sizeof(glm::vec3) + sizeof(glm::vec3) + sizeof(glm::vec2)));
 
 	    glBindTexture(GL_TEXTURE_2D, map);
 
@@ -168,6 +185,7 @@ int main() {
 	    glDisableVertexAttribArray(0);
 	    glDisableVertexAttribArray(1);
 	    glDisableVertexAttribArray(2);
+	    glDisableVertexAttribArray(3);
 
 	    glfwSwapBuffers(window);
 	    glfwPollEvents();
@@ -263,8 +281,8 @@ GLuint loadVertexDataFromFile(const char* filename, std::vector<vertex> &data, G
 	fprintf(stderr, "reading file - %s\n", filename);
 	while(index < (numberOfVertices)){
 		vertex entry;
-		fscanf(fp, "%f,%f,%f,%f,%f,%f,%f,%f", &entry.position.x, &entry.position.y, &entry.position.z, &entry.color.r, &entry.color.g, &entry.color.b, &entry.uv.s, &entry.uv.t);
-		fprintf(stderr, "v%d: %f,%f,%f,%f,%f,%f,%f,%f\n", index, entry.position.x, entry.position.y, entry.position.z, entry.color.r, entry.color.g, entry.color.b, entry.uv.s, entry.uv.t);
+		fscanf(fp, "%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f", &entry.position.x, &entry.position.y, &entry.position.z, &entry.color.r, &entry.color.g, &entry.color.b, &entry.uv.s, &entry.uv.t, &entry.normal.x, &entry.normal.y, &entry.normal.z);
+		fprintf(stderr, "v%d: %f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n", index, entry.position.x, entry.position.y, entry.position.z, entry.color.r, entry.color.g, entry.color.b, entry.uv.s, entry.uv.t, entry.normal.x, entry.normal.y, entry.normal.z);
 		data.push_back(entry);
 		index++;
 	}
