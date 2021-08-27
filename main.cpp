@@ -14,8 +14,6 @@ GLuint compileProgram(GLuint vertexShaderId, GLuint fragmentShaderId);
 GLuint loadShaderFromFile(const char* shader, GLuint type);
 GLuint loadTexture(const char* filename, int width, int height, GLint bitsPerPixel);
 GLuint loadVertexDataFromFile(const char* filename, std::vector<vertex> &data, GLuint numberOfVertices);
-GLuint loadIndexDataFromFile(const char* filename, std::vector<GLuint> &data, GLuint numberOfIndices);
-
 
 GLint y = 0;
 GLint x = 0;
@@ -30,7 +28,7 @@ int main() {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	GLFWwindow* window;
-	window = glfwCreateWindow( WIDTH, HEIGHT, "Render a triangle", NULL, NULL);
+	window = glfwCreateWindow( WIDTH, HEIGHT, "Tutorial 14-lighting", NULL, NULL);
 	if( NULL == window){
 	    fprintf( stderr, "Failed to open a window\n" );
 	    glfwTerminate();
@@ -55,12 +53,6 @@ int main() {
 		glfwTerminate();
 		return EXIT_FAILURE;
 	}
-	if(EXIT_FAILURE == loadIndexDataFromFile("./assets/models/cube.indices", indices, 36)){
-		fprintf( stderr, "Failed to load position information\n" );
-		glfwTerminate();
-		return EXIT_FAILURE;
-	}
-
 
 	GLuint vertexBuffer;
 	glGenBuffers(1, &vertexBuffer);
@@ -170,8 +162,7 @@ int main() {
 
 	    glBindTexture(GL_TEXTURE_2D, map);
 
-	    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-	    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, (void*)0);
+	    glDrawArrays(GL_TRIANGLES, 0, 12);
 
 	    glDisableVertexAttribArray(0);
 	    glDisableVertexAttribArray(1);
