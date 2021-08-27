@@ -47,7 +47,6 @@ int main() {
 	std::vector<GLuint> indices;
 
 
-
 	if(EXIT_FAILURE == loadVertexDataFromFile("./assets/models/cube.vertices", vertices, 36)){
 		fprintf( stderr, "Failed to load position information\n" );
 		glfwTerminate();
@@ -60,13 +59,13 @@ int main() {
 	/** set the data pointer **/
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertex), &vertices[0], GL_STATIC_DRAW);
 
-	GLuint vertexShader = loadShaderFromFile("./assets/shaders/m_v_p_uv_vs.glsl",GL_VERTEX_SHADER);
+	GLuint vertexShader = loadShaderFromFile("./assets/shaders/m_v_p_uv_light_vs.glsl",GL_VERTEX_SHADER);
 	if(!vertexShader){
 		fprintf(stderr, "cannot load vertex shader");
 		return EXIT_FAILURE;
 	}
 
-	GLuint fragmentShader = loadShaderFromFile("./assets/shaders/m_v_p_uv_fs.glsl",GL_FRAGMENT_SHADER);
+	GLuint fragmentShader = loadShaderFromFile("./assets/shaders/m_v_p_uv_light_fs.glsl",GL_FRAGMENT_SHADER);
 	if(!vertexShader){
 		fprintf(stderr, "cannot load fragment shader");
 		return EXIT_FAILURE;
@@ -81,7 +80,7 @@ int main() {
 	int width = 0;
 	int height = 0;
 	int bpp = 0;
-	GLuint map = loadTexture("./assets/textures/brick.png", width, height, bpp);
+	GLuint map = loadTexture("./assets/textures/cubemap.png", width, height, bpp);
 	if(map== 0){
 		fprintf(stderr, "could not load texture");
 		return EXIT_FAILURE;
@@ -138,8 +137,6 @@ int main() {
 
 		glm::mat4 projection = glm::perspective(glm::radians(60.0f), WIDTH * 1.0f/HEIGHT, 0.1f, 1000.0f);
 
-
-
 	    GLuint vs_m = glGetUniformLocation(programId, "m");
 	    GLuint vs_v = glGetUniformLocation(programId, "v");
 	    GLuint vs_p = glGetUniformLocation(programId, "p");
@@ -148,6 +145,15 @@ int main() {
 	    glUniformMatrix4fv(vs_v, 1, GL_FALSE, &view[0][0]);
 	    glUniformMatrix4fv(vs_p, 1, GL_FALSE, &projection[0][0]);
 
+
+	    glm::vec3 ambientColor(0.8f, 0.8f, 0.8f) ;
+	    GLfloat ambientStrength = 1.0f;
+
+	    GLuint fs_ambientColor = glGetUniformLocation(programId, "ambientColor");
+	    GLuint fs_ambientStrength = glGetUniformLocation(programId, "ambientStrength");
+
+	    glUniform3f(fs_ambientColor, ambientColor.r, ambientColor.g, ambientColor.b);
+	    glUniform1f(fs_ambientStrength, ambientStrength);
 
 	    /** set the attrib pointer inside the data **/
 	    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
@@ -182,8 +188,9 @@ GLuint loadTexture(const char* filename, int width, int height, GLint bitsPerPix
 			return EXIT_FAILURE;
 	}
 	glBindTexture(GL_TEXTURE_2D, textureId);
+	stbi_set_flip_vertically_on_load(true);
 	unsigned char* imageData = stbi_load(filename, &width, &height, &bitsPerPixel, 0);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, imageData);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
