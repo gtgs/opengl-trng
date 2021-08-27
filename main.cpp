@@ -158,9 +158,9 @@ int main() {
 
 
 
-	    glm::vec3 directionalLightPosition(10, 20, 5);
+	    glm::vec3 directionalLightPosition(7.5, 20, 5);
 		glm::vec3 directionalLightColor(0.5f, 0.0f, 0.0f);
-		GLfloat directionalLightStrength = 2.0f;
+		GLfloat directionalLightStrength = 1.0f;
 
 	    GLuint fs_directionalLightPosition = glGetUniformLocation(programId, "directionalLightPosition");
 	    GLuint fs_directionalLightColor= glGetUniformLocation(programId, "directionalLightColor");
