@@ -48,7 +48,7 @@ int main() {
 
 
 
-	if(EXIT_FAILURE == loadVertexDataFromFile("./assets/models/cube.vertices", vertices, 8)){
+	if(EXIT_FAILURE == loadVertexDataFromFile("./assets/models/cube.vertices", vertices, 36)){
 		fprintf( stderr, "Failed to load position information\n" );
 		glfwTerminate();
 		return EXIT_FAILURE;
@@ -60,18 +60,13 @@ int main() {
 	/** set the data pointer **/
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertex), &vertices[0], GL_STATIC_DRAW);
 
-	GLuint indexBuffer;
-	glGenBuffers(1, &indexBuffer);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), &indices[0], GL_STATIC_DRAW);
-
-	GLuint vertexShader = loadShaderFromFile("./assets/shaders/mvpvs.glsl",GL_VERTEX_SHADER);
+	GLuint vertexShader = loadShaderFromFile("./assets/shaders/m_v_p_uv_vs.glsl",GL_VERTEX_SHADER);
 	if(!vertexShader){
 		fprintf(stderr, "cannot load vertex shader");
 		return EXIT_FAILURE;
 	}
 
-	GLuint fragmentShader = loadShaderFromFile("./assets/shaders/mvpfs.glsl",GL_FRAGMENT_SHADER);
+	GLuint fragmentShader = loadShaderFromFile("./assets/shaders/m_v_p_uv_fs.glsl",GL_FRAGMENT_SHADER);
 	if(!vertexShader){
 		fprintf(stderr, "cannot load fragment shader");
 		return EXIT_FAILURE;
@@ -162,7 +157,7 @@ int main() {
 
 	    glBindTexture(GL_TEXTURE_2D, map);
 
-	    glDrawArrays(GL_TRIANGLES, 0, 12);
+	    glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
 
 	    glDisableVertexAttribArray(0);
 	    glDisableVertexAttribArray(1);
@@ -258,30 +253,13 @@ GLuint loadVertexDataFromFile(const char* filename, std::vector<vertex> &data, G
 		return EXIT_FAILURE;
 	}
 	GLuint index = 0;
-	vertex entry;
 	fprintf(stderr, "reading file - %s\n", filename);
-	while(index++ < (numberOfVertices)){
+	while(index < (numberOfVertices)){
+		vertex entry;
 		fscanf(fp, "%f,%f,%f,%f,%f,%f,%f,%f", &entry.position.x, &entry.position.y, &entry.position.z, &entry.color.r, &entry.color.g, &entry.color.b, &entry.uv.s, &entry.uv.t);
-		fprintf(stderr, "%f,%f,%f,%f,%f,%f,%f,%f\n", entry.position.x, entry.position.y, entry.position.z, entry.color.r, entry.color.g, entry.color.b, entry.uv.s, entry.uv.t);
+		fprintf(stderr, "v%d: %f,%f,%f,%f,%f,%f,%f,%f\n", index, entry.position.x, entry.position.y, entry.position.z, entry.color.r, entry.color.g, entry.color.b, entry.uv.s, entry.uv.t);
 		data.push_back(entry);
-	}
-	fclose(fp);
-	return EXIT_SUCCESS;
-}
-
-GLuint loadIndexDataFromFile(const char* filename, std::vector<GLuint> &data, GLuint numberOfIndices){
-	FILE * fp = fopen(filename, "r");
-	if(NULL == fp){
-		fprintf(stderr, "cannot read file - %s\n", filename);
-		return EXIT_FAILURE;
-	}
-	GLuint index = 0;
-	GLuint entry;
-	fprintf(stderr, "reading file - %s\n", filename);
-	while(index++ < (numberOfIndices)){
-		fscanf(fp, "%d", &entry);
-		fprintf(stderr, "%d\n", entry);
-		data.push_back(entry);
+		index++;
 	}
 	fclose(fp);
 	return EXIT_SUCCESS;
