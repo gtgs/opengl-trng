@@ -73,13 +73,13 @@ int main() {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), &indices[0], GL_STATIC_DRAW);
 
-	GLuint vertexShader = loadShaderFromFile("./assets/shaders/mvpvs.glsl",GL_VERTEX_SHADER);
+	GLuint vertexShader = loadShaderFromFile("./assets/shaders/mvp_color_vs.glsl",GL_VERTEX_SHADER);
 	if(!vertexShader){
 		fprintf(stderr, "cannot load vertex shader");
 		return EXIT_FAILURE;
 	}
 
-	GLuint fragmentShader = loadShaderFromFile("./assets/shaders/mvpfs.glsl",GL_FRAGMENT_SHADER);
+	GLuint fragmentShader = loadShaderFromFile("./assets/shaders/mvp_color_fs.glsl",GL_FRAGMENT_SHADER);
 	if(!vertexShader){
 		fprintf(stderr, "cannot load fragment shader");
 		return EXIT_FAILURE;
