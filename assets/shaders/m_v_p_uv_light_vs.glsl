@@ -14,6 +14,7 @@ out vec3 _normal;
 
 out vec3 _fragmentPositionInWorld;
 
+
 void main() {
 	gl_Position = p * v * m * vec4(position, 1);
 	_color = color;

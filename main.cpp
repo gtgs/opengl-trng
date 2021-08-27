@@ -80,7 +80,7 @@ int main() {
 	int width = 0;
 	int height = 0;
 	int bpp = 0;
-	GLuint map = loadTexture("./assets/textures/cubemap.png", width, height, bpp);
+	GLuint map = loadTexture("./assets/textures/metal-texture-sheet.jpg", width, height, bpp);
 	if(map== 0){
 		fprintf(stderr, "could not load texture");
 		return EXIT_FAILURE;
@@ -130,13 +130,15 @@ int main() {
 	    glEnableVertexAttribArray(2);
 	    glEnableVertexAttribArray(3);
 
+	    glm::vec3 cameraPosition(x, y, 10);
+
 	    glm::mat4 view = glm::lookAt(
-			glm::vec3(x, y, 10),
+			cameraPosition,
 			glm::vec3(0, 0, 0),
 			glm::vec3(0, 1, 0)
 		);
 
-		glm::mat4 projection = glm::perspective(glm::radians(60.0f), WIDTH * 1.0f/HEIGHT, 0.1f, 1000.0f);
+		glm::mat4 projection = glm::perspective(glm::radians(20.0f), WIDTH * 1.0f/HEIGHT, 0.1f, 1000.0f);
 
 	    GLuint vs_m = glGetUniformLocation(programId, "m");
 	    GLuint vs_v = glGetUniformLocation(programId, "v");
@@ -159,7 +161,7 @@ int main() {
 
 
 	    glm::vec3 directionalLightPosition(7.5, 20, 5);
-		glm::vec3 directionalLightColor(0.5f, 0.0f, 0.0f);
+		glm::vec3 directionalLightColor(1.0f, 0.7f, 0.0f);
 		GLfloat directionalLightStrength = 1.0f;
 
 	    GLuint fs_directionalLightPosition = glGetUniformLocation(programId, "directionalLightPosition");
@@ -169,6 +171,26 @@ int main() {
 	    glUniform3f(fs_directionalLightPosition, directionalLightPosition.x, directionalLightPosition.y, directionalLightPosition.z);
 	    glUniform3f(fs_directionalLightColor, directionalLightColor.x, directionalLightColor.y, directionalLightColor.z);
 	    glUniform1f(fs_directionalLightStrength, directionalLightStrength);
+
+
+	    glm::vec3 spotLightPosition(-1, 1, 0);
+	    glm::vec3 spotLightColor(0.0, 0.0, 1.0);
+	    GLfloat spotLightStrength = 10.0f;
+	    GLint shininess = 32;
+
+	    GLuint fs_cameraPosition = glGetUniformLocation(programId, "cameraPosition");
+	    GLuint fs_spotLightPosition = glGetUniformLocation(programId, "spotLightPosition");
+	    GLuint fs_spotLightColor = glGetUniformLocation(programId, "spotLightColor");
+	    GLuint fs_spotLightStrength = glGetUniformLocation(programId, "spotLightStrength");
+	    GLuint fs_shininess = glGetUniformLocation(programId, "shininess");
+
+	    glUniform3f(fs_cameraPosition, cameraPosition.x, cameraPosition.y, cameraPosition.z);
+	    glUniform3f(fs_spotLightPosition, spotLightPosition.x, spotLightPosition.y, spotLightPosition.z);
+	    glUniform3f(fs_spotLightColor, spotLightColor.x, spotLightColor.y, spotLightColor.z);
+
+	    glUniform1f(fs_spotLightStrength, spotLightStrength);
+	    glUniform1i(fs_shininess, shininess);
+
 
 
 	    /** set the attrib pointer inside the data **/
@@ -208,7 +230,7 @@ GLuint loadTexture(const char* filename, int width, int height, GLint bitsPerPix
 	glBindTexture(GL_TEXTURE_2D, textureId);
 	stbi_set_flip_vertically_on_load(true);
 	unsigned char* imageData = stbi_load(filename, &width, &height, &bitsPerPixel, 0);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, imageData);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
